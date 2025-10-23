@@ -71,7 +71,7 @@ router.post('/request', async (req, res) => {
 
     // TODO: Enviar email com o link de reset
     // Por enquanto, retornar o token (APENAS PARA DESENVOLVIMENTO)
-    const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetLink = `http://localhost:5000/reset-password?token=${resetToken}`;
     
     console.log('🔑 Reset Password Link:', resetLink);
     console.log('📧 Email:', email);
