@@ -36,6 +36,29 @@ const swaggerUiHandler = swaggerUi.setup(swaggerSpec, {
 app.use('/api-docs', swaggerUi.serve);
 app.get('/api-docs', swaggerUiHandler);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 Queta Boost API está rodando!',
+    status: 'online',
+    version: '1.0.0',
+    endpoints: {
+      documentation: '/api-docs',
+      health: '/api/health',
+      auth: '/api/auth',
+      posts: '/api/posts',
+      contacts: '/api/contacts',
+      users: '/api/users',
+      logs: '/api/logs',
+      passwordReset: '/api/password-reset'
+    },
+    links: {
+      documentation: 'https://quetaboost-back.vercel.app/api-docs',
+      frontend: 'https://quetaboost-front.vercel.app'
+    }
+  });
+});
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
