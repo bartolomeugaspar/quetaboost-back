@@ -3,6 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const supabase = require('../config/supabase');
+const { sendPasswordResetEmail } = require('../utils/emailHelper');
 
 /**
  * @swagger
@@ -69,12 +70,17 @@ router.post('/request', async (req, res) => {
       throw updateError;
     }
 
-    // TODO: Enviar email com o link de reset
-    // Por enquanto, retornar o token (APENAS PARA DESENVOLVIMENTO)
+    // Gerar link de reset
     const resetLink = `http://localhost:3001/reset-password?token=${resetToken}`;
     
-    console.log('🔑 Reset Password Link:', resetLink);
-    console.log('📧 Email:', email);
+    // Enviar email
+    try {
+      await sendPasswordResetEmail(user.email, resetLink, user.name);
+      console.log('✅ Email de recuperação enviado para:', user.email);
+    } catch (emailError) {
+      console.error('❌ Erro ao enviar email:', emailError);
+      // Continuar mesmo se o email falhar (não revelar se o email existe)
+    }
 
     res.json({
       message: 'Se o email existir, você receberá instruções para redefinir sua senha.',
