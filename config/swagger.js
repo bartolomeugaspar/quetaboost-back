@@ -21,8 +21,12 @@ const options = {
         description: 'Servidor de Desenvolvimento',
       },
       {
+        url: 'https://quetaboost-back.vercel.app',
+        description: 'Servidor de Produção (Vercel)',
+      },
+      {
         url: 'https://api.quetaboost.com',
-        description: 'Servidor de Produção',
+        description: 'Servidor de Produção (Domínio Customizado)',
       },
     ],
     components: {
@@ -282,10 +286,14 @@ const options = {
     ],
   },
   apis: [
-    './routes/*.js', 
-    './server.js', 
+    './routes/auth.js',
+    './routes/posts.js',
+    './routes/contacts.js',
+    './routes/users.js',
+    './routes/logs.js',
+    './routes/passwordReset.js',
     './routes/swagger-docs.js',
-    './routes/logs.js'
+    './server.js'
   ],
 };
 
