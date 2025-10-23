@@ -71,7 +71,6 @@ router.get('/test-no-auth', async (req, res) => {
  */
 // TEMPORÁRIO: Sem middlewares para debug
 router.get('/', async (req, res) => {
-  console.log('🔍 GET /api/logs chamado');
   try {
     const { status, limit = 100 } = req.query;
     
@@ -81,8 +80,6 @@ router.get('/', async (req, res) => {
     }
 
     const logs = await AuthLog.find(filters, { limit: parseInt(limit) });
-
-    console.log(`✅ Retornando ${logs.length} logs`);
     res.json({
       success: true,
       logs: logs,

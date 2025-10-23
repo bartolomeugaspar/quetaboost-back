@@ -272,6 +272,10 @@ const options = {
         description: 'Endpoints para visualização e gerenciamento de logs de autenticação',
       },
       {
+        name: 'Password Reset',
+        description: 'Endpoints para recuperação e redefinição de senha',
+      },
+      {
         name: 'Sistema',
         description: 'Endpoints de sistema e monitoramento',
       },

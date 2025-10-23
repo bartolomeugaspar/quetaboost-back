@@ -33,6 +33,7 @@ const postsRoutes = require('./routes/posts');
 const contactsRoutes = require('./routes/contacts');
 const usersRoutes = require('./routes/users');
 const logsRoutes = require('./routes/logs');
+const passwordResetRoutes = require('./routes/passwordReset');
 
 console.log('📋 Logs routes loaded:', typeof logsRoutes);
 
@@ -42,6 +43,7 @@ app.use('/api/posts', postsRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/logs', logsRoutes);
+app.use('/api/password-reset', passwordResetRoutes);
 
 console.log('✅ All routes registered');
 
