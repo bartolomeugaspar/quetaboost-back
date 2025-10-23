@@ -42,16 +42,6 @@ app.get('/', (req, res) => {
     message: '🚀 Queta Boost API está rodando!',
     status: 'online',
     version: '1.0.0',
-    endpoints: {
-      documentation: '/api-docs',
-      health: '/api/health',
-      auth: '/api/auth',
-      posts: '/api/posts',
-      contacts: '/api/contacts',
-      users: '/api/users',
-      logs: '/api/logs',
-      passwordReset: '/api/password-reset'
-    },
     links: {
       documentation: 'https://quetaboost-back.vercel.app/api-docs',
       frontend: 'https://quetaboost.vercel.app'
