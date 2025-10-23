@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const supabase = require('../config/supabase');
 const { sendPasswordResetEmail } = require('../utils/emailHelper');
+const API_CONFIG = require('../config/api');
 
 /**
  * @swagger
@@ -70,8 +71,8 @@ router.post('/request', async (req, res) => {
       throw updateError;
     }
 
-    // Gerar link de reset
-    const resetLink = `http://localhost:3001/reset-password?token=${resetToken}`;
+    // Gerar link de reset usando configuração
+    const resetLink = API_CONFIG.frontend.resetPasswordURL(resetToken);
     
     // Enviar email
     try {
