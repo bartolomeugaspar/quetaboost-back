@@ -284,17 +284,154 @@ const options = {
         description: 'Endpoints de sistema e monitoramento',
       },
     ],
+    paths: {
+      '/api/health': {
+        get: {
+          tags: ['Sistema'],
+          summary: 'Verificar status da API',
+          responses: {
+            200: {
+              description: 'API está funcionando',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      status: { type: 'string', example: 'OK' },
+                      message: { type: 'string', example: 'Queta Boost API is running' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/api/auth/login': {
+        post: {
+          tags: ['Autenticação'],
+          summary: 'Login de usuário',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    email: { type: 'string', example: 'admin@quetaboost.com' },
+                    password: { type: 'string', example: 'admin123' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            200: {
+              description: 'Login bem-sucedido',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      token: { type: 'string' },
+                      user: { $ref: '#/components/schemas/User' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/api/posts': {
+        get: {
+          tags: ['Posts'],
+          summary: 'Listar todos os posts publicados',
+          responses: {
+            200: {
+              description: 'Lista de posts',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      posts: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Post' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      '/api/contacts': {
+        get: {
+          tags: ['Contatos'],
+          summary: 'Listar todos os contatos',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Lista de contatos',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      contacts: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Contact' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        post: {
+          tags: ['Contatos'],
+          summary: 'Criar novo contato',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string', example: 'João Silva' },
+                    email: { type: 'string', example: 'joao@exemplo.com' },
+                    phone: { type: 'string', example: '+244 923 456 789' },
+                    subject: { type: 'string', example: 'Informações' },
+                    message: { type: 'string', example: 'Gostaria de mais informações...' }
+                  }
+                }
+              }
+            }
+          },
+          responses: {
+            201: {
+              description: 'Contato criado com sucesso'
+            }
+          }
+        }
+      }
+    }
   },
-  apis: [
-    './routes/auth.js',
-    './routes/posts.js',
-    './routes/contacts.js',
-    './routes/users.js',
-    './routes/logs.js',
-    './routes/passwordReset.js',
-    './routes/swagger-docs.js',
-    './server.js'
-  ],
+  apis: process.env.NODE_ENV === 'production' 
+    ? [] // Em produção, não tenta ler arquivos
+    : [
+        './routes/auth.js',
+        './routes/posts.js',
+        './routes/contacts.js',
+        './routes/users.js',
+        './routes/logs.js',
+        './routes/passwordReset.js',
+        './routes/swagger-docs.js',
+        './server.js'
+      ],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
