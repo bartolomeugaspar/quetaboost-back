@@ -32,12 +32,14 @@ const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
 const contactsRoutes = require('./routes/contacts');
 const usersRoutes = require('./routes/users');
+const logsRoutes = require('./routes/logs');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/auth/logs', logsRoutes);
 
 /**
  * @swagger

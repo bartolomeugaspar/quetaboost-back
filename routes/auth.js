@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../config/supabase');
+const { logSuccessfulLogin, logFailedLogin } = require('../utils/logHelper');
 
 /**
  * @swagger
@@ -182,6 +183,8 @@ router.post('/login', async (req, res) => {
       .single();
 
     if (error || !user) {
+      // Log failed login attempt
+      await logFailedLogin(email, 'User not found', req);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -189,6 +192,8 @@ router.post('/login', async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
+      // Log failed login attempt
+      await logFailedLogin(email, 'Invalid password', req);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -198,6 +203,9 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
+
+    // Log successful login
+    await logSuccessfulLogin(user, req);
 
     res.json({
       message: 'Login successful',
@@ -211,6 +219,10 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    // Log failed login attempt with error
+    if (req.body.email) {
+      await logFailedLogin(req.body.email, error.message, req);
+    }
     res.status(500).json({ error: 'Error logging in', details: error.message });
   }
 });
