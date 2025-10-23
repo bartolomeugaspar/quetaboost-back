@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
     },
     links: {
       documentation: 'https://quetaboost-back.vercel.app/api-docs',
-      frontend: 'https://quetaboost-front.vercel.app'
+      frontend: 'https://quetaboost.vercel.app'
     }
   });
 });
