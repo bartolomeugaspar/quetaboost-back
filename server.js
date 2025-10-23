@@ -16,6 +16,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+    filter: true,
+    tryItOutEnabled: true,
+  },
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'Queta Boost API Documentation',
 }));
@@ -24,11 +31,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 const authRoutes = require('./routes/auth');
 const postsRoutes = require('./routes/posts');
 const contactsRoutes = require('./routes/contacts');
+const usersRoutes = require('./routes/users');
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/contacts', contactsRoutes);
+app.use('/api/users', usersRoutes);
 
 /**
  * @swagger
