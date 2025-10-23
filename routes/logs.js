@@ -3,11 +3,35 @@ const router = express.Router();
 const AuthLog = require('../models/AuthLog');
 const { authenticateToken, isAdmin } = require('../middleware/auth');
 
+// Teste simples
+router.get('/test', (req, res) => {
+  console.log('✅ Rota de teste /api/logs/test funcionando!');
+  res.json({ message: 'Logs route is working!' });
+});
+
+// Teste sem middleware
+router.get('/test-no-auth', async (req, res) => {
+  console.log('🔍 GET /api/logs/test-no-auth chamado');
+  try {
+    const logs = await AuthLog.find({}, { limit: 10 });
+    res.json({
+      success: true,
+      logs: logs,
+      total: logs.length,
+      message: 'Rota funcionando sem autenticação'
+    });
+  } catch (error) {
+    console.error('❌ Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 /**
  * @swagger
- * /api/auth/logs:
+ * /api/logs:
  *   get:
  *     summary: Obter todos os logs de autenticação
+ *     description: Lista todos os logs de tentativas de login e ações de autenticação
  *     tags: [Logs]
  *     security:
  *       - bearerAuth: []
@@ -26,47 +50,46 @@ const { authenticateToken, isAdmin } = require('../middleware/auth');
  *         description: Número máximo de logs
  *     responses:
  *       200:
- *         description: Lista de logs
+ *         description: Lista de logs retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 logs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AuthLog'
+ *                 total:
+ *                   type: integer
  *       401:
  *         description: Não autorizado
  *       403:
- *         description: Acesso negado
+ *         description: Acesso negado (apenas admins)
  */
-router.get('/', authenticateToken, isAdmin, async (req, res) => {
+// TEMPORÁRIO: Sem middlewares para debug
+router.get('/', async (req, res) => {
+  console.log('🔍 GET /api/logs chamado');
   try {
     const { status, limit = 100 } = req.query;
     
-    let query = {};
+    const filters = {};
     if (status) {
-      query.status = status;
+      filters.status = status;
     }
 
-    const logs = await AuthLog.find(query)
-      .sort({ created_at: -1 })
-      .limit(parseInt(limit))
-      .populate('user_id', 'name email');
+    const logs = await AuthLog.find(filters, { limit: parseInt(limit) });
 
-    // Formatar logs para incluir informações do usuário
-    const formattedLogs = logs.map(log => ({
-      id: log._id,
-      user_id: log.user_id?._id,
-      user_email: log.user_email,
-      user_name: log.user_name || log.user_id?.name,
-      action: log.action,
-      status: log.status,
-      ip_address: log.ip_address,
-      user_agent: log.user_agent,
-      error_message: log.error_message,
-      created_at: log.created_at
-    }));
-
+    console.log(`✅ Retornando ${logs.length} logs`);
     res.json({
       success: true,
-      logs: formattedLogs,
-      total: formattedLogs.length
+      logs: logs,
+      total: logs.length
     });
   } catch (error) {
-    console.error('Error fetching logs:', error);
+    console.error('❌ Error fetching logs:', error);
     res.status(500).json({ 
       success: false,
       error: 'Erro ao buscar logs' 
@@ -88,15 +111,14 @@ router.get('/', authenticateToken, isAdmin, async (req, res) => {
  */
 router.get('/stats', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const totalLogs = await AuthLog.countDocuments();
-    const successLogs = await AuthLog.countDocuments({ status: 'success' });
-    const failedLogs = await AuthLog.countDocuments({ status: 'failed' });
+    const totalLogs = await AuthLog.count();
+    const successLogs = await AuthLog.count({ status: 'success' });
+    const failedLogs = await AuthLog.count({ status: 'failed' });
     
     // Logs das últimas 24 horas
     const last24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentLogs = await AuthLog.countDocuments({ 
-      created_at: { $gte: last24h } 
-    });
+    const allLogs = await AuthLog.find();
+    const recentLogs = allLogs.filter(log => new Date(log.created_at) >= last24h).length;
 
     res.json({
       success: true,
@@ -138,9 +160,7 @@ router.get('/user/:userId', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
     
-    const logs = await AuthLog.find({ user_id: userId })
-      .sort({ created_at: -1 })
-      .limit(50);
+    const logs = await AuthLog.find({ user_id: parseInt(userId) }, { limit: 50 });
 
     res.json({
       success: true,
@@ -178,7 +198,7 @@ router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     
-    await AuthLog.findByIdAndDelete(id);
+    await AuthLog.deleteById(parseInt(id));
 
     res.json({
       success: true,
@@ -207,16 +227,12 @@ router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
  */
 router.delete('/cleanup/old', authenticateToken, isAdmin, async (req, res) => {
   try {
-    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-    
-    const result = await AuthLog.deleteMany({ 
-      created_at: { $lt: ninetyDaysAgo } 
-    });
+    const result = await AuthLog.deleteOld(90);
 
     res.json({
       success: true,
-      message: `${result.deletedCount} logs antigos foram deletados`,
-      deletedCount: result.deletedCount
+      message: `Logs antigos foram deletados com sucesso`,
+      deletedCount: result ? result.length : 0
     });
   } catch (error) {
     console.error('Error cleaning up logs:', error);

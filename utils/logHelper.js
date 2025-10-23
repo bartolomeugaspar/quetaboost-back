@@ -14,7 +14,13 @@ const AuthLog = require('../models/AuthLog');
  */
 async function logAuth(data) {
   try {
-    const log = new AuthLog({
+    console.log('📝 Tentando criar log de autenticação:', {
+      email: data.user_email,
+      action: data.action,
+      status: data.status
+    });
+    
+    const log = await AuthLog.create({
       user_id: data.user_id || null,
       user_email: data.user_email,
       user_name: data.user_name || null,
@@ -25,10 +31,10 @@ async function logAuth(data) {
       error_message: data.error_message || null
     });
 
-    await log.save();
+    console.log('✅ Log criado com sucesso:', log.id);
     return log;
   } catch (error) {
-    console.error('Error creating auth log:', error);
+    console.error('❌ Error creating auth log:', error.message);
     // Não lançar erro para não interromper o fluxo principal
     return null;
   }

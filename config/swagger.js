@@ -184,6 +184,64 @@ const options = {
             },
           },
         },
+        AuthLog: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'ID único do log',
+              example: 1,
+            },
+            user_id: {
+              type: 'integer',
+              description: 'ID do usuário (pode ser null)',
+              example: 1,
+            },
+            user_email: {
+              type: 'string',
+              format: 'email',
+              description: 'Email usado na tentativa de autenticação',
+              example: 'admin@quetaboost.com',
+            },
+            user_name: {
+              type: 'string',
+              description: 'Nome do usuário',
+              example: 'Administrator',
+            },
+            action: {
+              type: 'string',
+              enum: ['login', 'logout', 'failed_login', 'password_reset'],
+              description: 'Tipo de ação realizada',
+              example: 'login',
+            },
+            status: {
+              type: 'string',
+              enum: ['success', 'failed', 'pending'],
+              description: 'Status da ação',
+              example: 'success',
+            },
+            ip_address: {
+              type: 'string',
+              description: 'Endereço IP de origem',
+              example: '192.168.1.1',
+            },
+            user_agent: {
+              type: 'string',
+              description: 'User agent do navegador/cliente',
+              example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+            },
+            error_message: {
+              type: 'string',
+              description: 'Mensagem de erro (se houver)',
+              example: 'Invalid password',
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Data e hora do log',
+            },
+          },
+        },
         Error: {
           type: 'object',
           properties: {
@@ -210,12 +268,21 @@ const options = {
         description: 'Endpoints para gerenciamento de contatos',
       },
       {
+        name: 'Logs',
+        description: 'Endpoints para visualização e gerenciamento de logs de autenticação',
+      },
+      {
         name: 'Sistema',
         description: 'Endpoints de sistema e monitoramento',
       },
     ],
   },
-  apis: ['./routes/*.js', './server.js', './routes/swagger-docs.js'],
+  apis: [
+    './routes/*.js', 
+    './server.js', 
+    './routes/swagger-docs.js',
+    './routes/logs.js'
+  ],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

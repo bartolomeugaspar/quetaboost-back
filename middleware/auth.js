@@ -26,4 +26,13 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, adminMiddleware };
+// Aliases para compatibilidade
+const authenticateToken = authMiddleware;
+const isAdmin = adminMiddleware;
+
+module.exports = { 
+  authMiddleware, 
+  adminMiddleware,
+  authenticateToken,
+  isAdmin
+};

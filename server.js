@@ -34,12 +34,16 @@ const contactsRoutes = require('./routes/contacts');
 const usersRoutes = require('./routes/users');
 const logsRoutes = require('./routes/logs');
 
+console.log('📋 Logs routes loaded:', typeof logsRoutes);
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postsRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/users', usersRoutes);
-app.use('/api/auth/logs', logsRoutes);
+app.use('/api/logs', logsRoutes);
+
+console.log('✅ All routes registered');
 
 /**
  * @swagger
@@ -65,6 +69,19 @@ app.use('/api/auth/logs', logsRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Queta Boost API is running' });
 });
+
+/**
+ * @swagger
+ * /api/logs:
+ *   get:
+ *     summary: Listar logs de autenticação
+ *     tags: [Logs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de logs
+ */
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -1,51 +1,130 @@
-const mongoose = require('mongoose');
+const supabase = require('../config/supabase');
 
-const authLogSchema = new mongoose.Schema({
-  user_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
+/**
+ * Modelo AuthLog para Supabase (PostgreSQL)
+ * Tabela: auth_logs
+ */
+
+const AuthLog = {
+  tableName: 'auth_logs',
+
+  /**
+   * Criar novo log
+   */
+  async create(data) {
+    const { data: log, error } = await supabase
+      .from(this.tableName)
+      .insert([{
+        user_id: data.user_id || null,
+        user_email: data.user_email,
+        user_name: data.user_name || null,
+        action: data.action || 'login',
+        status: data.status || 'success',
+        ip_address: data.ip_address || null,
+        user_agent: data.user_agent || null,
+        error_message: data.error_message || null
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return log;
   },
-  user_email: {
-    type: String,
-    required: true
+
+  /**
+   * Buscar todos os logs com filtros
+   */
+  async find(filters = {}, options = {}) {
+    let query = supabase
+      .from(this.tableName)
+      .select('*');
+
+    // Aplicar filtros
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters.user_id) {
+      query = query.eq('user_id', filters.user_id);
+    }
+    if (filters.user_email) {
+      query = query.eq('user_email', filters.user_email);
+    }
+    if (filters.action) {
+      query = query.eq('action', filters.action);
+    }
+
+    // Ordenar
+    query = query.order('created_at', { ascending: false });
+
+    // Limitar resultados
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
   },
-  user_name: {
-    type: String,
-    default: null
+
+  /**
+   * Buscar log por ID
+   */
+  async findById(id) {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data;
   },
-  action: {
-    type: String,
-    enum: ['login', 'logout', 'failed_login', 'password_reset'],
-    default: 'login'
+
+  /**
+   * Contar logs
+   */
+  async count(filters = {}) {
+    let query = supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact', head: true });
+
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    const { count, error } = await query;
+    if (error) throw error;
+    return count || 0;
   },
-  status: {
-    type: String,
-    enum: ['success', 'failed', 'pending'],
-    default: 'success'
+
+  /**
+   * Deletar log por ID
+   */
+  async deleteById(id) {
+    const { error } = await supabase
+      .from(this.tableName)
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
   },
-  ip_address: {
-    type: String,
-    default: null
-  },
-  user_agent: {
-    type: String,
-    default: null
-  },
-  error_message: {
-    type: String,
-    default: null
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
+
+  /**
+   * Deletar logs antigos (mais de X dias)
+   */
+  async deleteOld(days = 90) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .delete()
+      .lt('created_at', cutoffDate.toISOString());
+
+    if (error) throw error;
+    return data;
   }
-});
+};
 
-// Índices para melhor performance
-authLogSchema.index({ user_email: 1 });
-authLogSchema.index({ status: 1 });
-authLogSchema.index({ created_at: -1 });
-authLogSchema.index({ user_id: 1 });
-
-module.exports = mongoose.model('AuthLog', authLogSchema);
+module.exports = AuthLog;
