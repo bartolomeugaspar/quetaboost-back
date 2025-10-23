@@ -20,19 +20,21 @@ app.get('/api-docs.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
-// Swagger Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+// Swagger Documentation UI
+const swaggerUiHandler = swaggerUi.setup(swaggerSpec, {
   explorer: true,
   swaggerOptions: {
     persistAuthorization: true,
     displayRequestDuration: true,
     filter: true,
     tryItOutEnabled: true,
-    url: '/api-docs.json',
   },
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'Queta Boost API Documentation',
-}));
+});
+
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUiHandler);
 
 // Import routes
 const authRoutes = require('./routes/auth');
